@@ -138,14 +138,26 @@ struct ina2xx_data {
 	uint8_t charge[5];
 };
 
-#if 1
-int ina2xx_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, uint32_t *val);
-int ina2xx_reg_read_16(const struct ina2xx_config *cfg, uint8_t reg, uint16_t *val);
-int ina2xx_reg_write(const struct ina2xx_config *cfg, uint8_t reg, uint16_t val);
+static inline int ina2xx_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, uint32_t *val) 
+{
+	return cfg->ops->reg_read_24(cfg->bus, reg, val);
+}
 
-int ina2xx_reg_read(const struct ina2xx_config *cfg, const struct ina2xx_reg *reg,
-				void *buf, size_t len);
-#endif
+static inline int ina2xx_reg_read_16(const struct ina2xx_config *cfg, uint8_t reg, uint16_t *val) 
+{
+	return cfg->ops->reg_read_16(cfg->bus, reg, val);
+}
+
+static inline int ina2xx_reg_write(const struct ina2xx_config *cfg, uint8_t reg, uint16_t val)
+{
+	return cfg->ops->reg_read(cfg->bus, reg, buf, len);
+}
+
+static inline int ina2xx_reg_read(const struct ina2xx_config *cfg, const struct ina2xx_reg *reg,
+				void *buf, size_t len)
+{
+	return cfg->ops->reg_write(cfg->bus, reg, val);
+}
 
 int ina2xx_sample_fetch(const struct device *dev, enum sensor_channel chan);
 

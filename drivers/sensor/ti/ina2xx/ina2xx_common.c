@@ -12,27 +12,6 @@
 
 LOG_MODULE_REGISTER(INA2XX, CONFIG_SENSOR_LOG_LEVEL);
 
-int ina2xx_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, uint32_t *val)
-{
-	return cfg->ops->reg_read_24(cfg->bus, reg, val);
-}
-
-int ina2xx_reg_read_16(const struct ina2xx_config *cfg, uint8_t reg, uint16_t *val)
-{
-	return cfg->ops->reg_read_16(cfg->bus, reg, val);
-}
-
-int ina2xx_reg_read(const struct ina2xx_config *cfg, const struct ina2xx_reg *reg,
-				void *buf, size_t len)
-{
-	return cfg->ops->reg_read(cfg->bus, reg, buf, len);
-}
-
-int ina2xx_reg_write(const struct ina2xx_config *cfg, uint8_t reg, uint16_t val)
-{
-	return cfg->ops->reg_write(cfg->bus, reg, val);
-}
-
 int ina2xx_init(const struct device *dev)
 {
 	const struct ina2xx_config *config = dev->config;

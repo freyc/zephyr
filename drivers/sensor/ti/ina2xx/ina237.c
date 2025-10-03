@@ -365,6 +365,15 @@ static DEVICE_API(sensor, ina228_driver_api) = {
 	DT_INST_PROP(inst, current_lsb_microamps) *           \
 	DT_INST_PROP(inst, rshunt_micro_ohms) / 10000000ULL
 
+#define INA2XX_I2C_CONFIG(inst)                                        \
+	.bus = {.i2c = I2C_DT_SPEC_INST_GET(inst)},                        \
+	.ops = &ina2xx_i2c_ops,                                            \
+
+#define INA2XX_SPI_CONFIG(inst)                                                                   \
+	.bus = {.spi = SPI_DT_SPEC_INST_GET(inst, (SPI_WORD_SET(8) | SPI_TRANSFER_MSB | SPI_MODE_CPOL | SPI_MODE_CPHA), 0) }, \
+	.ops = &ina2xx_spi_ops,
+
+
 #define INA237_DRIVER_INIT(inst)                                               \
 	static struct ina237_data ina237_data_##inst;                              \
 	static const struct ina237_config ina237_config_##inst = {                 \
@@ -392,8 +401,7 @@ static DEVICE_API(sensor, ina228_driver_api) = {
 	static struct ina237_data ina239_data_##inst;                              \
 	static const struct ina237_config ina239_config_##inst = {                 \
 		.common = {                                                            \
-			.bus = {.spi = SPI_DT_SPEC_INST_GET(inst)},                        \
-			.ops = &ina2xx_spi_ops,                                            \
+			INA2XX_SPI_CONFIG(inst),                                           \
 			.current_lsb = DT_INST_PROP(inst, current_lsb_microamps),          \
 			.config = INA237_DT_CONFIG(inst),                                  \
 			.adc_config = INA237_DT_ADC_CONFIG(inst),                          \
