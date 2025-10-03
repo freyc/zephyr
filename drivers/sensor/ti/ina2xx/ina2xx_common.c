@@ -12,56 +12,25 @@
 
 LOG_MODULE_REGISTER(INA2XX, CONFIG_SENSOR_LOG_LEVEL);
 
-int ina2xx_reg_read_24(const struct i2c_dt_spec *bus, uint8_t reg, uint32_t *val)
+int ina2xx_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, uint32_t *val)
 {
-	uint8_t data[3];
-	int ret;
-
-	ret = i2c_burst_read_dt(bus, reg, data, sizeof(data));
-	if (ret < 0) {
-		return ret;
-	}
-
-	*val = sys_get_be24(data);
-
-	return ret;
+	return cfg->ops->reg_read_24(cfg->bus, reg, val);
 }
 
-int ina2xx_reg_read_16(const struct i2c_dt_spec *bus, uint8_t reg, uint16_t *val)
+int ina2xx_reg_read_16(const struct ina2xx_config *cfg, uint8_t reg, uint16_t *val)
 {
-	uint8_t data[2];
-	int ret;
-
-	ret = i2c_burst_read_dt(bus, reg, data, sizeof(data));
-	if (ret < 0) {
-		return ret;
-	}
-
-	*val = sys_get_be16(data);
-
-	return ret;
+	return cfg->ops->reg_read_16(cfg->bus, reg, val);
 }
 
-int ina2xx_reg_read(const struct i2c_dt_spec *bus, const struct ina2xx_reg *reg,
+int ina2xx_reg_read(const struct ina2xx_config *cfg, const struct ina2xx_reg *reg,
 				void *buf, size_t len)
 {
-	const size_t bytes = (reg->size + 7) / 8;
-
-	if (len < bytes) {
-		return -EINVAL;
-	}
-
-	return i2c_burst_read_dt(bus, reg->addr, buf, bytes);
+	return cfg->ops->reg_read(cfg->bus, reg, buf, len);
 }
 
-int ina2xx_reg_write(const struct i2c_dt_spec *bus, uint8_t reg, uint16_t val)
+int ina2xx_reg_write(const struct ina2xx_config *cfg, uint8_t reg, uint16_t val)
 {
-	uint8_t tx_buf[3];
-
-	tx_buf[0] = reg;
-	sys_put_be16(val, &tx_buf[1]);
-
-	return i2c_write_dt(bus, tx_buf, sizeof(tx_buf));
+	return cfg->ops->reg_write(cfg->bus, reg, val);
 }
 
 int ina2xx_init(const struct device *dev)
@@ -70,7 +39,7 @@ int ina2xx_init(const struct device *dev)
 	uint16_t id;
 	int ret;
 
-	if (!device_is_ready(config->bus.bus)) {
+	if (!config->ops.is_bus_ready(config)) {
 		LOG_ERR("I2C bus %s is not ready", config->bus.bus->name);
 		return -ENODEV;
 	}

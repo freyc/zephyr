@@ -369,7 +369,8 @@ static DEVICE_API(sensor, ina228_driver_api) = {
 	static struct ina237_data ina237_data_##inst;                              \
 	static const struct ina237_config ina237_config_##inst = {                 \
 		.common = {                                                            \
-			.bus = I2C_DT_SPEC_INST_GET(inst),	                               \
+			.bus = {.i2c = I2C_DT_SPEC_INST_GET(inst)},                        \
+			.ops = &ina2xx_i2c_ops,                                            \
 			.current_lsb = DT_INST_PROP(inst, current_lsb_microamps),          \
 			.config = INA237_DT_CONFIG(inst),                                  \
 			.adc_config = INA237_DT_ADC_CONFIG(inst),                          \
@@ -387,11 +388,35 @@ static DEVICE_API(sensor, ina228_driver_api) = {
 					&ina237_data_##inst, &ina237_config_##inst, POST_KERNEL,   \
 				    CONFIG_SENSOR_INIT_PRIORITY, &ina237_driver_api);
 
+#define INA239_DRIVER_INIT(inst)                                               \
+	static struct ina237_data ina239_data_##inst;                              \
+	static const struct ina237_config ina239_config_##inst = {                 \
+		.common = {                                                            \
+			.bus = {.spi = SPI_DT_SPEC_INST_GET(inst)},                        \
+			.ops = &ina2xx_spi_ops,                                            \
+			.current_lsb = DT_INST_PROP(inst, current_lsb_microamps),          \
+			.config = INA237_DT_CONFIG(inst),                                  \
+			.adc_config = INA237_DT_ADC_CONFIG(inst),                          \
+			.cal = INA237_DT_CAL(inst),                                        \
+			.id_reg = &ina237_mfr_id,                                          \
+			.config_reg = &ina237_config,                                      \
+			.adc_config_reg = &ina237_adc_config,                              \
+			.cal_reg = &ina237_shunt_cal,                                      \
+			.channels = &ina237_channels,                                      \
+		},                                                                     \
+		.alert_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, alert_gpios, {0}),        \
+		.alert_config = DT_INST_PROP_OR(inst, alert_config, 0x01),             \
+	};                                                                         \
+	SENSOR_DEVICE_DT_INST_DEFINE(inst, &ina237_init, NULL,                     \
+					&ina239_data_##inst, &ina239_config_##inst, POST_KERNEL,   \
+				    CONFIG_SENSOR_INIT_PRIORITY, &ina237_driver_api);
+
 #define INA228_DRIVER_INIT(inst)                                               \
 	static struct ina237_data ina228_data_##inst;                              \
 	static const struct ina237_config ina228_config_##inst = {                 \
 		.common = {                                                            \
-			.bus = I2C_DT_SPEC_INST_GET(inst),                                 \
+			.bus = { .i2c = I2C_DT_SPEC_INST_GET(inst) },                      \
+			.ops = &ina2xx_i2c_ops,                                            \
 			.current_lsb = DT_INST_PROP(inst, current_lsb_microamps),          \
 			.adc_config = INA237_DT_ADC_CONFIG(inst),                          \
 			.cal = (INA237_DT_CAL(inst) * 16),                                 \
@@ -409,6 +434,10 @@ static DEVICE_API(sensor, ina228_driver_api) = {
 
 #define DT_DRV_COMPAT ti_ina237
 DT_INST_FOREACH_STATUS_OKAY(INA237_DRIVER_INIT)
+#undef DT_DRV_COMPAT
+
+#define DT_DRV_COMPAT ti_ina239
+DT_INST_FOREACH_STATUS_OKAY(INA239_DRIVER_INIT)
 #undef DT_DRV_COMPAT
 
 #define DT_DRV_COMPAT ti_ina228

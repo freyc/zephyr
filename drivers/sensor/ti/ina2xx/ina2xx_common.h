@@ -11,8 +11,21 @@
 #include <stdint.h>
 
 #include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/spi.h>
 #include <zephyr/drivers/sensor/ina2xx.h>
 #include <zephyr/sys/util_macro.h>
+
+#define INA2XX_BUS_I2C	DT_HAS_COMPAT_ON_BUS_STATUS_OKAY(ti_ina237, i2c) || DT_HAS_COMPAT_ON_BUS_STATUS_OKAY(ti_ina228, i2c)
+#define INA2XX_BUS_SPI	DT_HAS_COMPAT_ON_BUS_STATUS_OKAY(ti_ina239, spi) || DT_HAS_COMPAT_ON_BUS_STATUS_OKAY(ti_ina229, spi)
+
+union ina2xx_bus_cfg {
+#if INA2XX_BUS_I2C
+	struct i2c_dt_spec i2c;
+#endif
+#if INA2XX_BUS_SPI
+	struct spi_dt_spec spi;
+#endif
+};
 
 /**
  * @brief Value of the manufacturer ID register (ASCII 'TI')
@@ -83,11 +96,21 @@ struct ina2xx_channels {
 	const struct ina2xx_channel *charge;
 };
 
+struct ina2xx_ops {
+	bool(*is_bus_ready)(const union ina2xx_bus_cfg *bus);
+	int(*reg_read_24)(const union ina2xx_bus_cfg *bus, uint8_t reg, uint32_t *val);
+	int(*reg_read_16)(const union ina2xx_bus_cfg *bus, uint8_t reg, uint16_t *val);
+	int(*reg_write)(const union ina2xx_bus_cfg *bus, uint8_t reg, uint32_t val);
+	int(*reg_read)(const union ina2xx_bus_cfg *bus, const struct ina2xx_reg *reg,
+				void *buf, size_t len);
+};
+
 /**
  * @brief INA2XX configuration structure.
  */
 struct ina2xx_config {
-	struct i2c_dt_spec bus;
+	union ina2xx_bus_cfg bus;
+	const struct ina2xx_ops *ops;
 	uint32_t current_lsb;
 	uint16_t config;
 	uint16_t adc_config;
@@ -115,12 +138,14 @@ struct ina2xx_data {
 	uint8_t charge[5];
 };
 
-int ina2xx_reg_read_24(const struct i2c_dt_spec *bus, uint8_t reg, uint32_t *val);
-int ina2xx_reg_read_16(const struct i2c_dt_spec *bus, uint8_t reg, uint16_t *val);
-int ina2xx_reg_write(const struct i2c_dt_spec *bus, uint8_t reg, uint16_t val);
+#if 1
+int ina2xx_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, uint32_t *val);
+int ina2xx_reg_read_16(const struct ina2xx_config *cfg, uint8_t reg, uint16_t *val);
+int ina2xx_reg_write(const struct ina2xx_config *cfg, uint8_t reg, uint16_t val);
 
-int ina2xx_reg_read(const struct i2c_dt_spec *bus, const struct ina2xx_reg *reg,
+int ina2xx_reg_read(const struct ina2xx_config *cfg, const struct ina2xx_reg *reg,
 				void *buf, size_t len);
+#endif
 
 int ina2xx_sample_fetch(const struct device *dev, enum sensor_channel chan);
 
@@ -134,5 +159,13 @@ int ina2xx_attr_get(const struct device *dev, enum sensor_channel chan,
 				enum sensor_attribute attr, struct sensor_value *val);
 
 int ina2xx_init(const struct device *dev);
+
+#if INA2XX_BUS_I2C
+extern const struct ina2xx_ops ina2xx_i2c_ops;
+#endif
+
+#if INA2XX_BUS_SPI
+extern const struct ina2xx_ops ina2xx_spi_ops;
+#endif
 
 #endif /* ZEPHYR_DRIVERS_SENSOR_INA2XX_COMMON_H_ */
