@@ -12,7 +12,7 @@ static int ina2xx_i2c_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, 
 	uint8_t data[3];
 	int ret;
 
-	ret = i2c_burst_read_dt(bus, reg, data, sizeof(data));
+	ret = i2c_burst_read_dt(&cfg->bus.i2c, reg, data, sizeof(data));
 	if (ret < 0) {
 		return ret;
 	}
@@ -27,7 +27,7 @@ static int ina2xx_i2c_reg_read_16(const struct ina2xx_config *cfg, uint8_t reg, 
 	uint8_t data[2];
 	int ret;
 
-	ret = i2c_burst_read_dt(bus, reg, data, sizeof(data));
+	ret = i2c_burst_read_dt(&cfg->bus.i2c, reg, data, sizeof(data));
 	if (ret < 0) {
 		return ret;
 	}
@@ -46,7 +46,7 @@ static int ina2xx_i2c_reg_read(const struct ina2xx_config *cfg, const struct ina
 		return -EINVAL;
 	}
 
-	return i2c_burst_read_dt(bus, reg->addr, buf, bytes);
+	return i2c_burst_read_dt(&cfg->bus.i2c, reg->addr, buf, bytes);
 }
 
 static int ina2xx_i2c_reg_write(const struct ina2xx_config *cfg, uint8_t reg, uint16_t val)
@@ -56,7 +56,7 @@ static int ina2xx_i2c_reg_write(const struct ina2xx_config *cfg, uint8_t reg, ui
 	tx_buf[0] = reg;
 	sys_put_be16(val, &tx_buf[1]);
 
-	return i2c_write_dt(bus, tx_buf, sizeof(tx_buf));
+	return i2c_write_dt(&cfg->bus.i2c, tx_buf, sizeof(tx_buf));
 }
 
 const struct ina2xx_ops ina2xx_i2c_ops = {

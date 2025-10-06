@@ -4,10 +4,16 @@
 
 #if INA2XX_BUS_SPI
 
+#define CMD_LEN		1
+
+#define CMD_READ(reg)	(((reg)<<2) | 0x01)
+#define CMD_WRITE(reg)	(((reg)<<2) | 0x00)
+
 static int ina2xx_spi_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, uint32_t *val)
 {
-	uint8_t cmd_buf[1] = {reg << 2 | 0x01};
-	uint8_t rx_buffer[3];
+	
+	uint8_t cmd_buf[CMD_LEN] = {reg << 2 | 0x01};
+	uint8_t rx_buffer[CMD_LEN + 3];
 	
 	const struct spi_buf tx_buf = {
 		.buf = cmd_buf,
@@ -20,23 +26,19 @@ static int ina2xx_spi_reg_read_24(const struct ina2xx_config *cfg, uint8_t reg, 
 
 	const struct spi_buf rx_buf[] = {
 		{
-			.buf = NULL,
-			.len = sizeof(cmd_buf)
-		},
-		{
 			.buf = rx_buffer,
 			.len = sizeof(rx_buffer)
-		},
+		}
 	};
 	const struct spi_buf_set rx = {
 		.buffers = &rx_buf,
-		.count = 2
+		.count = 1
 	};
 
 	int result = spi_transceive_dt(&bus->spi, &tx, &rx);
 	if(result == 0)
 	{
-		*val = sys_get_be24(rx_buffer);
+		*val = sys_get_be24(&rx_buffer[CMD_LEN]);
 	}
 	return result;
 }
