@@ -24,7 +24,7 @@ int ina2xx_init(const struct device *dev)
 	}
 
 	if (config->id_reg) {
-		ret = ina2xx_reg_read_16(&config->bus, config->id_reg->addr, &id);
+		ret = ina2xx_reg_read_16(config, config->id_reg->addr, &id);
 		if (ret < 0) {
 			LOG_ERR("failed to read manufacturer register");
 			return ret;
@@ -37,7 +37,7 @@ int ina2xx_init(const struct device *dev)
 	}
 
 	if (config->config_reg) {
-		ret = ina2xx_reg_write(&config->bus,
+		ret = ina2xx_reg_write(config,
 			config->config_reg->addr, config->config);
 
 		if (ret < 0) {
@@ -47,7 +47,7 @@ int ina2xx_init(const struct device *dev)
 	}
 
 	if (config->adc_config_reg) {
-		ret = ina2xx_reg_write(&config->bus,
+		ret = ina2xx_reg_write(config,
 			config->adc_config_reg->addr, config->adc_config);
 
 		if (ret < 0) {
@@ -57,7 +57,7 @@ int ina2xx_init(const struct device *dev)
 	}
 
 	if (config->cal_reg) {
-		ret = ina2xx_reg_write(&config->bus, config->cal_reg->addr, config->cal);
+		ret = ina2xx_reg_write(config, config->cal_reg->addr, config->cal);
 		if (ret < 0) {
 			LOG_ERR("failed to write calibration register");
 			return ret;

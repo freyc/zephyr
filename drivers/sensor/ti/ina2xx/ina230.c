@@ -56,7 +56,7 @@ static int ina230_set_feature_mask(const struct device *dev, const struct sensor
 	const struct ina2xx_config *config = dev->config;
 	uint16_t data = val->val1;
 
-	return ina2xx_reg_write(&config->bus, INA230_REG_MASK, data);
+	return ina2xx_reg_write(config, INA230_REG_MASK, data);
 }
 
 static int ina230_set_alert(const struct device *dev, const struct sensor_value *val)
@@ -64,7 +64,7 @@ static int ina230_set_alert(const struct device *dev, const struct sensor_value 
 	const struct ina2xx_config *config = dev->config;
 	uint16_t data = val->val1;
 
-	return ina2xx_reg_write(&config->bus, INA230_REG_ALERT, data);
+	return ina2xx_reg_write(config, INA230_REG_ALERT, data);
 }
 
 static int ina230_attr_set(const struct device *dev, enum sensor_channel chan,
@@ -87,7 +87,7 @@ static int ina230_get_feature_mask(const struct device *dev, struct sensor_value
 	uint16_t data;
 	int ret;
 
-	ret = ina2xx_reg_read_16(&config->bus, INA230_REG_MASK, &data);
+	ret = ina2xx_reg_read_16(config, INA230_REG_MASK, &data);
 	if (ret < 0) {
 		return ret;
 	}
@@ -104,7 +104,7 @@ static int ina230_get_alert(const struct device *dev, struct sensor_value *val)
 	uint16_t data;
 	int ret;
 
-	ret = ina2xx_reg_read_16(&config->bus, INA230_REG_ALERT, &data);
+	ret = ina2xx_reg_read_16(config, INA230_REG_ALERT, &data);
 	if (ret < 0) {
 		return ret;
 	}
@@ -133,7 +133,6 @@ static int ina230_init_trigger(const struct device *dev)
 {
 	if (IS_ENABLED(CONFIG_INA230_TRIGGER)) {
 		const struct ina230_config *const config = dev->config;
-		const struct i2c_dt_spec *bus = &config->common.bus;
 		int ret;
 
 		if (!config->trig_enabled) {
@@ -146,13 +145,13 @@ static int ina230_init_trigger(const struct device *dev)
 			return ret;
 		}
 
-		ret = ina2xx_reg_write(bus, INA230_REG_ALERT, config->alert_limit);
+		ret = ina2xx_reg_write(&config->common, INA230_REG_ALERT, config->alert_limit);
 		if (ret < 0) {
 			LOG_ERR("Failed to write alert register!");
 			return ret;
 		}
 
-		ret = ina2xx_reg_write(bus, INA230_REG_MASK, config->mask);
+		ret = ina2xx_reg_write(&config->common, INA230_REG_MASK, config->mask);
 		if (ret < 0) {
 			LOG_ERR("Failed to write mask register!");
 			return ret;

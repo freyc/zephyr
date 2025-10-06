@@ -17,7 +17,7 @@ static int ina2xx_fetch_bus_voltage(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->voltage, sizeof(data->voltage));
+		return ina2xx_reg_read(config, ch->reg, data->voltage, sizeof(data->voltage));
 	}
 
 	return -ENOTSUP;
@@ -34,7 +34,7 @@ static int ina2xx_fetch_shunt_voltage(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->vshunt, sizeof(data->vshunt));
+		return ina2xx_reg_read(config, ch->reg, data->vshunt, sizeof(data->vshunt));
 	}
 
 	return -ENOTSUP;
@@ -51,7 +51,7 @@ static int ina2xx_fetch_current(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->current, sizeof(data->current));
+		return ina2xx_reg_read(config, ch->reg, data->current, sizeof(data->current));
 	}
 
 	return -ENOTSUP;
@@ -68,7 +68,7 @@ static int ina2xx_fetch_power(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->power, sizeof(data->power));
+		return ina2xx_reg_read(config, ch->reg, data->power, sizeof(data->power));
 	}
 
 	return -ENOTSUP;
@@ -85,7 +85,7 @@ static int ina2xx_fetch_die_temp(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->die_temp,
+		return ina2xx_reg_read(config, ch->reg, data->die_temp,
 			sizeof(data->die_temp));
 	}
 
@@ -103,7 +103,7 @@ static int ina2xx_fetch_energy(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->energy, sizeof(data->energy));
+		return ina2xx_reg_read(config, ch->reg, data->energy, sizeof(data->energy));
 	}
 
 	return -ENOTSUP;
@@ -120,7 +120,7 @@ static int ina2xx_fetch_charge(const struct device *dev)
 			return -ENOTSUP;
 		}
 
-		return ina2xx_reg_read(&config->bus, ch->reg, data->charge, sizeof(data->charge));
+		return ina2xx_reg_read(config, ch->reg, data->charge, sizeof(data->charge));
 	}
 
 	return -ENOTSUP;
