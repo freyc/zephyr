@@ -62,7 +62,8 @@ static DEVICE_API(sensor, ina226_driver_api) = {
 #define INA226_DRIVER_INIT(inst)                                  \
 	static struct ina2xx_data ina226_data_##inst;                 \
 	static const struct ina2xx_config ina226_config_##inst = {    \
-		.bus = I2C_DT_SPEC_INST_GET(inst),                        \
+		.bus = {.i2c = I2C_DT_SPEC_INST_GET(inst)},               \
+		.ops = &ina2xx_i2c_ops,                                   \
 		.current_lsb = DT_INST_PROP(inst, current_lsb_microamps), \
 		.cal = INA226_DT_CAL(inst),                               \
 		.config = INA226_DT_CONFIG(inst),                         \

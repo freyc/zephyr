@@ -214,7 +214,8 @@ static DEVICE_API(sensor, ina230_driver_api) = {
 	static struct ina230_data ina230_data_##inst;                              \
 	static const struct ina230_config ina230_config_##inst = {                 \
 		.common = {                                                            \
-			.bus = I2C_DT_SPEC_INST_GET(inst),                                 \
+			.bus = {.i2c = I2C_DT_SPEC_INST_GET(inst)},                        \
+			.ops = &ina2xx_i2c_ops,                                            \
 			.current_lsb = DT_INST_PROP(inst, current_lsb_microamps),          \
 			.config = INA230_DT_CONFIG(inst),                                  \
 			.cal = INA230_DT_CAL(inst),                                        \
@@ -236,7 +237,8 @@ static DEVICE_API(sensor, ina230_driver_api) = {
 	static struct ina230_data ina236_data_##inst;                              \
 	static const struct ina230_config ina236_config_##inst = {                 \
 		.common = {                                                            \
-			.bus = I2C_DT_SPEC_INST_GET(inst),                                 \
+			.bus = {.i2c = I2C_DT_SPEC_INST_GET(inst)},                        \
+			.ops = &ina2xx_i2c_ops,                                            \
 			.current_lsb = DT_INST_PROP(inst, current_lsb_microamps),          \
 			.config = INA230_DT_CONFIG(inst),                                  \
 			.cal = INA230_DT_CAL(inst),                                        \
